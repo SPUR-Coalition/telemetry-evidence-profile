@@ -30,6 +30,8 @@ One profile, four modules. Each module states the bounded proposition its eviden
 
 Module maturity is described as workflow levels V0-V3 within the profile; the levels describe how far a module's tooling and fixtures have progressed, not a ladder of assertion strength.
 
+The recomputable-attribution module also specifies the attribution report shape its recomputation check runs over. That carrier travels as a namespaced extension in the standard's `data` container, which profiles may define (SCOPE.md in the standard); listing it as a known extension in the core repository is a separate step, taken once two independent estimators exchange the same shape (standard issue #19).
+
 ## Participating
 
 The working group is chartered in [CHARTER.md](./CHARTER.md). Contribution does not require SPUR membership: file issues here, and propose new capabilities as short human-written notes per [CONTRIBUTING.md](./CONTRIBUTING.md). Decisions are recorded publicly on this tracker.
