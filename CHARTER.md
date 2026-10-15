@@ -47,7 +47,7 @@ Work happens in this repository. Proposals follow the standard's human-written-p
 
 ## Duration and cadence
 
-The group is chartered from 2 September 2026. The first working session takes place in early October 2026 and is announced on this tracker with joining details; sessions are announced the same way thereafter. The group reviews its continuation at each profile release, and at least every six months.
+The group is chartered from 2 September 2026. The first working session takes place on 5 November 2026 and is announced on this tracker, with joining details sent by invite from the chair; sessions are announced the same way thereafter. The group reviews its continuation at each profile release, and at least every six months.
 
 ## Relationship to the standard
 
