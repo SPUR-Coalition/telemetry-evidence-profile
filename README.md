@@ -23,7 +23,7 @@ One profile, four modules. Each module states the bounded proposition its eviden
 
 | Module | Proposition supported | Origin | Editors |
 |--------|----------------------|--------|---------|
-| [Fingerprint schemes](./modules/) | A declared scheme's signal was checked in an identified representation | Standard issues #5, #16, #17; PR #21 | [TBC] |
+| [Fingerprint schemes](./modules/fingerprint-schemes/) | A declared scheme's signal was checked in an identified representation, by an identified checker, with a stated result | Standard issues #5, #11, #16, #17; PR #21 | [TBC]; proposed @erik-sv, @RedHorseMane |
 | [VPTS seeded observations](./modules/) | A publisher-seeded marker was observed in reported or sampled output | Standard issue #18 | [TBC] |
 | [Recomputable attribution](./modules/) | A disclosed attribution result recomputes from disclosed inputs | Standard issues #19, #20 | [TBC] |
 | [Entitlement credentials](./modules/) | A signed, unrevoked grant from an identified issuer covered the reported access | Standard issue #22; PR #34 | [TBC] |

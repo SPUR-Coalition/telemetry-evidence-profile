@@ -1,0 +1,49 @@
+services:
+  wp-db:
+    image: mariadb:11
+    environment:
+      MARIADB_DATABASE: wp
+      MARIADB_ROOT_PASSWORD: rootpass
+      MARIADB_USER: wp
+      MARIADB_PASSWORD: wppass
+    volumes:
+      - wp-db-data:/var/lib/mysql
+
+  wordpress:
+    image: wordpress:latest
+    depends_on: [wp-db]
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: wp-db
+      WORDPRESS_DB_NAME: wp
+      WORDPRESS_DB_USER: wp
+      WORDPRESS_DB_PASSWORD: wppass
+    volumes:
+      - wp-data:/var/www/html
+
+  spip-db:
+    image: mariadb:11
+    environment:
+      MARIADB_DATABASE: spip
+      MARIADB_ROOT_PASSWORD: rootpass
+      MARIADB_USER: spip
+      MARIADB_PASSWORD: spippass
+    volumes:
+      - spip-db-data:/var/lib/mysql
+
+  spip:
+    build:
+      context: .
+      dockerfile: Dockerfile.spip
+    depends_on: [spip-db]
+    ports:
+      - "8081:80"
+    volumes:
+      - spip-data:/var/www/html
+
+volumes:
+  wp-db-data:
+  wp-data:
+  spip-db-data:
+  spip-data:
