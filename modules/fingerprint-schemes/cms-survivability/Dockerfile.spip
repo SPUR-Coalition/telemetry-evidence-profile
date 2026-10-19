@@ -1,0 +1,27 @@
+FROM php:8.2-apache
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        git curl unzip libzip-dev libpng-dev libjpeg62-turbo-dev zlib1g-dev libxml2-dev libonig-dev \
+    && docker-php-ext-configure gd --with-jpeg \
+    && docker-php-ext-install mysqli zip gd mbstring xml \
+    && a2enmod rewrite
+
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Official SPIP core repo (git.spip.net, not GitHub - GitHub does not mirror
+# SPIP), stable 4.3 tag. plugins-dist and squelettes-dist are not submodules
+# of this repo: they are separate git.spip.net repos listed by path/tag in
+# plugins-dist.json, and core requires at least urls_etendues (URL routing,
+# without it even the install wizard 500s) plus squelettes-dist (the public
+# site templates - without it every public page 500s).
+RUN git clone --depth 1 --branch 4.3.9 https://git.spip.net/spip/spip.git /tmp/spip \
+    && cp -r /tmp/spip/. /var/www/html/ \
+    && rm -rf /tmp/spip \
+    && git clone --depth 1 --branch v4.1.6 https://git.spip.net/spip/urls.git /var/www/html/plugins-dist/urls_etendues \
+    && rm -rf /var/www/html/plugins-dist/urls_etendues/.git \
+    && git clone --depth 1 --branch 4.2.6 https://git.spip.net/spip/dist.git /var/www/html/squelettes-dist \
+    && rm -rf /var/www/html/squelettes-dist/.git \
+    && cd /var/www/html && composer install --no-dev --no-interaction --optimize-autoloader \
+    && chown -R www-data:www-data /var/www/html \
+    && apt-get purge -y --auto-remove git \
+    && rm -rf /var/lib/apt/lists/*

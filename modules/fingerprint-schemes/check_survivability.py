@@ -4,15 +4,19 @@
 Implements only recovery of the public C2PA 2.4 Appendix A.8
 C2PATextManifestWrapper for carrier-recovery testing. It performs no
 claim-signature, certificate, or hard-binding validation.
+
+Rows with a "reproduction" block were transformed outside this script, by
+publishing through named software. The runner decodes and checks the
+captured output like any other row.
 """
 
 import codecs
 import hashlib
 import json
+import re
 import sys
 import unicodedata
 from pathlib import Path
-
 
 MATRIX_PATH = Path(__file__).parent / "fixtures" / "survivability-c2pa-text.json"
 MAGIC = b"C2PATXT"
@@ -90,6 +94,25 @@ def _strip_default_ignorables(text):
     )
 
 
+def _fragment_retaining_wrapper(marked_text, source_text):
+    """Drop leading visible text, as an excerpt would, keeping the whole wrapper."""
+    return marked_text[len(source_text) - len("sample.") :]
+
+
+def _whitespace_collapse(marked_text, source_text):
+    """Widen the visible whitespace, then collapse every run to one space."""
+    widened = source_text.replace(" ", "  \t", 1).replace(" ", "\n ", 1)
+    return re.sub(r"\s+", " ", widened + marked_text[len(source_text) :])
+
+
+def _reproduced(row):
+    escaped = (row.get("reproduction") or {}).get("captured_rendered_text_unicode_escape")
+    if not escaped:
+        raise ValueError("row has a reproduction block but no captured text")
+    return _decode_fixture(escaped)
+
+
+
 def _apply_transform(name, marked_text, source_text):
     transforms = {
         "baseline": lambda: marked_text,
@@ -106,6 +129,11 @@ def _apply_transform(name, marked_text, source_text):
         ),
         "default_ignorable_stripping": lambda: _strip_default_ignorables(marked_text),
         "fragment_extraction_wrapper_omitted": lambda: source_text,
+        "fragment_extraction_wrapper_retained": lambda: _fragment_retaining_wrapper(
+            marked_text, source_text
+        ),
+        "whitespace_collapse": lambda: _whitespace_collapse(marked_text, source_text),
+        "paraphrase_or_summary": lambda: "A short sample about provenance in a cafe.",
     }
     try:
         return transforms[name]()
@@ -155,7 +183,11 @@ def run_checks():
 
         executed += 1
         try:
-            transformed = _apply_transform(name, marked_text, fixture["source_text"])
+            transformed = (
+                _reproduced(row)
+                if "reproduction" in row
+                else _apply_transform(name, marked_text, fixture["source_text"])
+            )
             recovered = _extract_manifest(transformed)
             if recovered is not None and recovered != expected_manifest:
                 actual = "manifest_mismatch"

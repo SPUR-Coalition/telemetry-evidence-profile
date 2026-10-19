@@ -1,0 +1,562 @@
+{
+  "fixture_version": "0.1",
+  "targets": "Content Telemetry 1.0",
+  "runner": "modules/fingerprint-schemes/check_records.py",
+  "scope": "Structural and consistency rules of module sections 5 to 7. Signature and trusted-timestamp formats are open question 1: these vectors test that the members are present, not that they verify. All schemes, keys and parties are fictional.",
+  "declarations": [
+    {
+      "scheme": "https://example.org/schemes/identity-example",
+      "version": "1",
+      "class": "identity",
+      "content_borne": true,
+      "resolution": "document",
+      "time_anchors_supported": [
+        "signer_asserted",
+        "trusted_timestamp"
+      ],
+      "trust_anchors_supported": [
+        "https://example.org/trust-list"
+      ],
+      "check_methods": [
+        "reproducible"
+      ],
+      "survivability": {
+        "ref": "https://example.org/schemes/identity-example/matrix.json",
+        "digest": "sha256:b716512d1aff64630d1e0177430e99c54652dee0709415f2038c3798e870bae0"
+      },
+      "known_limits": [
+        {
+          "limit": "paraphrase and summarisation remove the signal",
+          "tested": false
+        }
+      ]
+    },
+    {
+      "scheme": "https://example.org/schemes/match-example",
+      "version": "1",
+      "class": "match",
+      "content_borne": false,
+      "resolution": "document",
+      "time_anchors_supported": [
+        "registry_time"
+      ],
+      "check_methods": [
+        "attested"
+      ],
+      "survivability": {
+        "ref": "https://example.org/schemes/match-example/matrix.json",
+        "digest": "sha256:5d159c60bff457710ed351e7ce22ec62ead0b79d44a5d42a9da5449d17c54336"
+      },
+      "known_limits": [
+        {
+          "limit": "translation",
+          "tested": false
+        }
+      ]
+    }
+  ],
+  "emitter_manifest": {
+    "schema_version": "1.0",
+    "id": "https://agent.example.org/.well-known/content-telemetry.json",
+    "roles": [
+      "agent"
+    ],
+    "operator": {
+      "name": "Example Agent Ltd"
+    },
+    "keys": [
+      {
+        "id": "emitter-1",
+        "type": "Ed25519",
+        "publicKey": "z6MkExampleEmitterKeyNotARealKey000000000000000"
+      }
+    ]
+  },
+  "events": {
+    "evt-whole": {
+      "type": "content_grounded",
+      "event_id": "evt-whole",
+      "data": {
+        "scope": "turn",
+        "content_hash": "sha256:97c8aeb83848ea71fcd3a3274666ea05c8a05d448cb83c3b800a2ad7e76c44e6",
+        "content_fingerprint": {
+          "scheme": "https://example.org/schemes/identity-example",
+          "detected": true
+        }
+      }
+    },
+    "evt-chunk-a": {
+      "type": "content_grounded",
+      "event_id": "evt-chunk-a",
+      "data": {
+        "scope": "turn",
+        "content_hash": "sha256:4de4871faedaba110e51f0c213e2352f117c5e412f76ffe8cef5d0599ed4fc5b",
+        "content_fingerprint": {
+          "scheme": "https://example.org/schemes/identity-example",
+          "detected": true
+        }
+      }
+    }
+  },
+  "vectors": [
+    {
+      "id": "valid-identity-found",
+      "description": "An independent checker finds and validates an identity signal in the whole grounded document.",
+      "record": {
+        "scheme": "https://example.org/schemes/identity-example",
+        "declaration": {
+          "ref": "https://example.org/schemes/identity-example/declaration.json",
+          "digest": "sha256:8e288a4cba5f4664e554646032729d8dcd80cf15121c84519f2477729367766a"
+        },
+        "subject": {
+          "role": "grounded_content",
+          "digest": "sha256:97c8aeb83848ea71fcd3a3274666ea05c8a05d448cb83c3b800a2ad7e76c44e6"
+        },
+        "event": {
+          "session_id": "550e8400-e29b-41d4-a716-446655440000",
+          "event_id": "evt-whole"
+        },
+        "result": "found",
+        "signal": {
+          "signer": "Example Publisher Ltd",
+          "trust_anchor": "https://example.org/trust-list",
+          "work_id": "urn:example:work:42",
+          "time_anchor": "trusted_timestamp"
+        },
+        "method": "reproducible",
+        "checker": {
+          "id": "https://checker.example.org",
+          "legal_name": "Example Checker Ltd",
+          "public_key": "z6MkExampleCheckerKeyNotARealKey000000000000000"
+        },
+        "relationships": [],
+        "checked_at": "2026-10-19T12:00:00Z",
+        "signature": "fixture-only: format is open question 1",
+        "trusted_timestamp": "fixture-only: format is open question 1"
+      },
+      "expected_errors": []
+    },
+    {
+      "id": "valid-match-found",
+      "description": "A match scheme reports a registry match under a named decision policy.",
+      "record": {
+        "scheme": "https://example.org/schemes/match-example",
+        "declaration": {
+          "ref": "https://example.org/schemes/match-example/declaration.json",
+          "digest": "sha256:0df4a9810bc3338acd270e2e944cfb081588e2c84c7cbca00d17038e72acca66"
+        },
+        "subject": {
+          "role": "grounded_content",
+          "digest": "sha256:97c8aeb83848ea71fcd3a3274666ea05c8a05d448cb83c3b800a2ad7e76c44e6"
+        },
+        "event": {
+          "session_id": "550e8400-e29b-41d4-a716-446655440000",
+          "event_id": "evt-whole"
+        },
+        "result": "found",
+        "signal": {
+          "registry": "https://registry.example.org",
+          "entry": "entry-42",
+          "policy": {
+            "id": "https://registry.example.org/policy/1",
+            "digest": "sha256:9c9294a5d4b5a5fb0f72c1c80083707547f16ddca0a317cde0f96260462a73cd"
+          }
+        },
+        "method": "attested",
+        "checker": {
+          "id": "https://checker.example.org",
+          "legal_name": "Example Checker Ltd",
+          "public_key": "z6MkExampleCheckerKeyNotARealKey000000000000000"
+        },
+        "relationships": [],
+        "checked_at": "2026-10-19T12:00:00Z",
+        "signature": "fixture-only: format is open question 1",
+        "trusted_timestamp": "fixture-only: format is open question 1"
+      },
+      "expected_errors": []
+    },
+    {
+      "id": "valid-chunk-indeterminate",
+      "description": "A document-resolution scheme is asked about a known chunk and reports indeterminate.",
+      "record": {
+        "scheme": "https://example.org/schemes/identity-example",
+        "declaration": {
+          "ref": "https://example.org/schemes/identity-example/declaration.json",
+          "digest": "sha256:8e288a4cba5f4664e554646032729d8dcd80cf15121c84519f2477729367766a"
+        },
+        "subject": {
+          "role": "grounded_content",
+          "digest": "sha256:4de4871faedaba110e51f0c213e2352f117c5e412f76ffe8cef5d0599ed4fc5b",
+          "part_of": "sha256:97c8aeb83848ea71fcd3a3274666ea05c8a05d448cb83c3b800a2ad7e76c44e6"
+        },
+        "event": {
+          "event_id": "evt-chunk-a"
+        },
+        "result": "indeterminate",
+        "method": "reproducible",
+        "checker": {
+          "id": "https://checker.example.org",
+          "legal_name": "Example Checker Ltd",
+          "public_key": "z6MkExampleCheckerKeyNotARealKey000000000000000"
+        },
+        "relationships": [],
+        "checked_at": "2026-10-19T12:00:00Z",
+        "signature": "fixture-only: format is open question 1",
+        "trusted_timestamp": "fixture-only: format is open question 1"
+      },
+      "expected_errors": []
+    },
+    {
+      "id": "valid-invalid-binding",
+      "description": "A signal is present but its binding to the content fails.",
+      "record": {
+        "scheme": "https://example.org/schemes/identity-example",
+        "declaration": {
+          "ref": "https://example.org/schemes/identity-example/declaration.json",
+          "digest": "sha256:8e288a4cba5f4664e554646032729d8dcd80cf15121c84519f2477729367766a"
+        },
+        "subject": {
+          "role": "grounded_content",
+          "digest": "sha256:97c8aeb83848ea71fcd3a3274666ea05c8a05d448cb83c3b800a2ad7e76c44e6"
+        },
+        "event": {
+          "session_id": "550e8400-e29b-41d4-a716-446655440000",
+          "event_id": "evt-whole"
+        },
+        "result": "invalid",
+        "method": "reproducible",
+        "checker": {
+          "id": "https://checker.example.org",
+          "legal_name": "Example Checker Ltd",
+          "public_key": "z6MkExampleCheckerKeyNotARealKey000000000000000"
+        },
+        "relationships": [],
+        "checked_at": "2026-10-19T12:00:00Z",
+        "signature": "fixture-only: format is open question 1",
+        "trusted_timestamp": "fixture-only: format is open question 1",
+        "invalid_reason": "binding_mismatch"
+      },
+      "expected_errors": []
+    },
+    {
+      "id": "valid-disclosed-self-check",
+      "description": "The checker uses the emitter's key and discloses the link. The record is valid and counts as an emitter claim.",
+      "record": {
+        "scheme": "https://example.org/schemes/identity-example",
+        "declaration": {
+          "ref": "https://example.org/schemes/identity-example/declaration.json",
+          "digest": "sha256:8e288a4cba5f4664e554646032729d8dcd80cf15121c84519f2477729367766a"
+        },
+        "subject": {
+          "role": "grounded_content",
+          "digest": "sha256:97c8aeb83848ea71fcd3a3274666ea05c8a05d448cb83c3b800a2ad7e76c44e6"
+        },
+        "event": {
+          "session_id": "550e8400-e29b-41d4-a716-446655440000",
+          "event_id": "evt-whole"
+        },
+        "result": "found",
+        "signal": {
+          "signer": "Example Publisher Ltd",
+          "trust_anchor": "https://example.org/trust-list",
+          "work_id": "urn:example:work:42",
+          "time_anchor": "trusted_timestamp"
+        },
+        "method": "reproducible",
+        "checker": {
+          "id": "https://checker.example.org",
+          "legal_name": "Example Checker Ltd",
+          "public_key": "z6MkExampleEmitterKeyNotARealKey000000000000000"
+        },
+        "relationships": [
+          {
+            "party": "emitter",
+            "link": "key_custody"
+          }
+        ],
+        "checked_at": "2026-10-19T12:00:00Z",
+        "signature": "fixture-only: format is open question 1",
+        "trusted_timestamp": "fixture-only: format is open question 1"
+      },
+      "expected_errors": []
+    },
+    {
+      "id": "neg-subject-digest-mismatch",
+      "description": "The record names an event whose content_hash differs from the subject digest.",
+      "record": {
+        "scheme": "https://example.org/schemes/identity-example",
+        "declaration": {
+          "ref": "https://example.org/schemes/identity-example/declaration.json",
+          "digest": "sha256:8e288a4cba5f4664e554646032729d8dcd80cf15121c84519f2477729367766a"
+        },
+        "subject": {
+          "role": "grounded_content",
+          "digest": "sha256:6f6c6d81d849e7ae6b623b7212d2a90fabbc35dedc9bc15be584bac54f6c47ed"
+        },
+        "event": {
+          "session_id": "550e8400-e29b-41d4-a716-446655440000",
+          "event_id": "evt-whole"
+        },
+        "result": "found",
+        "signal": {
+          "signer": "Example Publisher Ltd",
+          "trust_anchor": "https://example.org/trust-list",
+          "work_id": "urn:example:work:42",
+          "time_anchor": "trusted_timestamp"
+        },
+        "method": "reproducible",
+        "checker": {
+          "id": "https://checker.example.org",
+          "legal_name": "Example Checker Ltd",
+          "public_key": "z6MkExampleCheckerKeyNotARealKey000000000000000"
+        },
+        "relationships": [],
+        "checked_at": "2026-10-19T12:00:00Z",
+        "signature": "fixture-only: format is open question 1",
+        "trusted_timestamp": "fixture-only: format is open question 1"
+      },
+      "expected_errors": [
+        "subject_digest_mismatch"
+      ]
+    },
+    {
+      "id": "neg-binding-mismatch-as-found",
+      "description": "The record reports found while stating a binding mismatch.",
+      "record": {
+        "scheme": "https://example.org/schemes/identity-example",
+        "declaration": {
+          "ref": "https://example.org/schemes/identity-example/declaration.json",
+          "digest": "sha256:8e288a4cba5f4664e554646032729d8dcd80cf15121c84519f2477729367766a"
+        },
+        "subject": {
+          "role": "grounded_content",
+          "digest": "sha256:97c8aeb83848ea71fcd3a3274666ea05c8a05d448cb83c3b800a2ad7e76c44e6"
+        },
+        "event": {
+          "session_id": "550e8400-e29b-41d4-a716-446655440000",
+          "event_id": "evt-whole"
+        },
+        "result": "found",
+        "signal": {
+          "signer": "Example Publisher Ltd",
+          "trust_anchor": "https://example.org/trust-list",
+          "work_id": "urn:example:work:42",
+          "time_anchor": "trusted_timestamp"
+        },
+        "method": "reproducible",
+        "checker": {
+          "id": "https://checker.example.org",
+          "legal_name": "Example Checker Ltd",
+          "public_key": "z6MkExampleCheckerKeyNotARealKey000000000000000"
+        },
+        "relationships": [],
+        "checked_at": "2026-10-19T12:00:00Z",
+        "signature": "fixture-only: format is open question 1",
+        "trusted_timestamp": "fixture-only: format is open question 1",
+        "invalid_reason": "binding_mismatch"
+      },
+      "expected_errors": [
+        "invalid_reason_outside_invalid"
+      ]
+    },
+    {
+      "id": "neg-undisclosed-emitter-key",
+      "description": "The checker signs with a key listed in the emitter's manifest and its relationships list is empty.",
+      "record": {
+        "scheme": "https://example.org/schemes/identity-example",
+        "declaration": {
+          "ref": "https://example.org/schemes/identity-example/declaration.json",
+          "digest": "sha256:8e288a4cba5f4664e554646032729d8dcd80cf15121c84519f2477729367766a"
+        },
+        "subject": {
+          "role": "grounded_content",
+          "digest": "sha256:97c8aeb83848ea71fcd3a3274666ea05c8a05d448cb83c3b800a2ad7e76c44e6"
+        },
+        "event": {
+          "session_id": "550e8400-e29b-41d4-a716-446655440000",
+          "event_id": "evt-whole"
+        },
+        "result": "found",
+        "signal": {
+          "signer": "Example Publisher Ltd",
+          "trust_anchor": "https://example.org/trust-list",
+          "work_id": "urn:example:work:42",
+          "time_anchor": "trusted_timestamp"
+        },
+        "method": "reproducible",
+        "checker": {
+          "id": "https://checker.example.org",
+          "legal_name": "Example Checker Ltd",
+          "public_key": "z6MkExampleEmitterKeyNotARealKey000000000000000"
+        },
+        "relationships": [],
+        "checked_at": "2026-10-19T12:00:00Z",
+        "signature": "fixture-only: format is open question 1",
+        "trusted_timestamp": "fixture-only: format is open question 1"
+      },
+      "expected_errors": [
+        "undisclosed_emitter_relationship"
+      ]
+    },
+    {
+      "id": "neg-missing-timestamp",
+      "description": "The record carries no trusted timestamp.",
+      "record": {
+        "scheme": "https://example.org/schemes/identity-example",
+        "declaration": {
+          "ref": "https://example.org/schemes/identity-example/declaration.json",
+          "digest": "sha256:8e288a4cba5f4664e554646032729d8dcd80cf15121c84519f2477729367766a"
+        },
+        "subject": {
+          "role": "grounded_content",
+          "digest": "sha256:97c8aeb83848ea71fcd3a3274666ea05c8a05d448cb83c3b800a2ad7e76c44e6"
+        },
+        "event": {
+          "session_id": "550e8400-e29b-41d4-a716-446655440000",
+          "event_id": "evt-whole"
+        },
+        "result": "found",
+        "signal": {
+          "signer": "Example Publisher Ltd",
+          "trust_anchor": "https://example.org/trust-list",
+          "work_id": "urn:example:work:42",
+          "time_anchor": "trusted_timestamp"
+        },
+        "method": "reproducible",
+        "checker": {
+          "id": "https://checker.example.org",
+          "legal_name": "Example Checker Ltd",
+          "public_key": "z6MkExampleCheckerKeyNotARealKey000000000000000"
+        },
+        "relationships": [],
+        "checked_at": "2026-10-19T12:00:00Z",
+        "signature": "fixture-only: format is open question 1"
+      },
+      "expected_errors": [
+        "missing_trusted_timestamp"
+      ]
+    },
+    {
+      "id": "neg-match-as-identity",
+      "description": "A match scheme's result carries a signer and trust anchor, presenting it as an identity result.",
+      "record": {
+        "scheme": "https://example.org/schemes/match-example",
+        "declaration": {
+          "ref": "https://example.org/schemes/match-example/declaration.json",
+          "digest": "sha256:0df4a9810bc3338acd270e2e944cfb081588e2c84c7cbca00d17038e72acca66"
+        },
+        "subject": {
+          "role": "grounded_content",
+          "digest": "sha256:97c8aeb83848ea71fcd3a3274666ea05c8a05d448cb83c3b800a2ad7e76c44e6"
+        },
+        "event": {
+          "session_id": "550e8400-e29b-41d4-a716-446655440000",
+          "event_id": "evt-whole"
+        },
+        "result": "found",
+        "signal": {
+          "registry": "https://registry.example.org",
+          "entry": "entry-42",
+          "policy": {
+            "id": "https://registry.example.org/policy/1",
+            "digest": "sha256:9c9294a5d4b5a5fb0f72c1c80083707547f16ddca0a317cde0f96260462a73cd"
+          },
+          "signer": "Example Publisher Ltd",
+          "trust_anchor": "https://example.org/trust-list"
+        },
+        "method": "attested",
+        "checker": {
+          "id": "https://checker.example.org",
+          "legal_name": "Example Checker Ltd",
+          "public_key": "z6MkExampleCheckerKeyNotARealKey000000000000000"
+        },
+        "relationships": [],
+        "checked_at": "2026-10-19T12:00:00Z",
+        "signature": "fixture-only: format is open question 1",
+        "trusted_timestamp": "fixture-only: format is open question 1"
+      },
+      "expected_errors": [
+        "match_presented_as_identity"
+      ]
+    },
+    {
+      "id": "neg-not-found-on-chunk",
+      "description": "A document-resolution scheme reports not_found on a chunk the checker knows is part of a document.",
+      "record": {
+        "scheme": "https://example.org/schemes/identity-example",
+        "declaration": {
+          "ref": "https://example.org/schemes/identity-example/declaration.json",
+          "digest": "sha256:8e288a4cba5f4664e554646032729d8dcd80cf15121c84519f2477729367766a"
+        },
+        "subject": {
+          "role": "grounded_content",
+          "digest": "sha256:4de4871faedaba110e51f0c213e2352f117c5e412f76ffe8cef5d0599ed4fc5b",
+          "part_of": "sha256:97c8aeb83848ea71fcd3a3274666ea05c8a05d448cb83c3b800a2ad7e76c44e6"
+        },
+        "event": {
+          "event_id": "evt-chunk-a"
+        },
+        "result": "not_found",
+        "method": "reproducible",
+        "checker": {
+          "id": "https://checker.example.org",
+          "legal_name": "Example Checker Ltd",
+          "public_key": "z6MkExampleCheckerKeyNotARealKey000000000000000"
+        },
+        "relationships": [],
+        "checked_at": "2026-10-19T12:00:00Z",
+        "signature": "fixture-only: format is open question 1",
+        "trusted_timestamp": "fixture-only: format is open question 1"
+      },
+      "expected_errors": [
+        "document_scheme_on_part"
+      ]
+    },
+    {
+      "id": "neg-two-chunks-one-record",
+      "description": "One record covers two chunks.",
+      "record": {
+        "scheme": "https://example.org/schemes/identity-example",
+        "declaration": {
+          "ref": "https://example.org/schemes/identity-example/declaration.json",
+          "digest": "sha256:8e288a4cba5f4664e554646032729d8dcd80cf15121c84519f2477729367766a"
+        },
+        "subject": [
+          {
+            "role": "grounded_content",
+            "digest": "sha256:4de4871faedaba110e51f0c213e2352f117c5e412f76ffe8cef5d0599ed4fc5b",
+            "part_of": "sha256:97c8aeb83848ea71fcd3a3274666ea05c8a05d448cb83c3b800a2ad7e76c44e6"
+          },
+          {
+            "role": "grounded_content",
+            "digest": "sha256:6f6c6d81d849e7ae6b623b7212d2a90fabbc35dedc9bc15be584bac54f6c47ed",
+            "part_of": "sha256:97c8aeb83848ea71fcd3a3274666ea05c8a05d448cb83c3b800a2ad7e76c44e6"
+          }
+        ],
+        "event": {
+          "event_id": "evt-chunk-a"
+        },
+        "result": "found",
+        "signal": {
+          "signer": "Example Publisher Ltd",
+          "trust_anchor": "https://example.org/trust-list",
+          "work_id": "urn:example:work:42",
+          "time_anchor": "trusted_timestamp"
+        },
+        "method": "reproducible",
+        "checker": {
+          "id": "https://checker.example.org",
+          "legal_name": "Example Checker Ltd",
+          "public_key": "z6MkExampleCheckerKeyNotARealKey000000000000000"
+        },
+        "relationships": [],
+        "checked_at": "2026-10-19T12:00:00Z",
+        "signature": "fixture-only: format is open question 1",
+        "trusted_timestamp": "fixture-only: format is open question 1"
+      },
+      "expected_errors": [
+        "multiple_subjects"
+      ]
+    }
+  ]
+}

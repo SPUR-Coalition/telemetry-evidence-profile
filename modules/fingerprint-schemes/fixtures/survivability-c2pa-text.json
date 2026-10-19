@@ -1,5 +1,5 @@
 {
-  "matrix_version": "0.1",
+  "matrix_version": "0.2",
   "scheme": "c2pa-text",
   "profile_ref": "https://spec.c2pa.org/specifications/specifications/2.4/specs/C2PA_Specification.html#embedding_manifests_into_unstructured_text",
   "profile_digest": "sha256:d55caebd96206f0de667962a4bab7098c6b6468fba68f8b55bcdd3a12d1ed26d",
@@ -78,7 +78,7 @@
     {
       "transform": "fragment_extraction_wrapper_retained",
       "operation": "extract a content fragment that retains the complete Appendix A.8 wrapper",
-      "observed_result": "not_tested",
+      "observed_result": "association_recovered",
       "full_c2pa_validation": "not_run_expected_hard_binding_failure_unless_profile_defines_fragment_binding"
     },
     {
@@ -90,20 +90,35 @@
     {
       "transform": "wordpress_editor_round_trip",
       "operation": "publish and retrieve through a named WordPress version and editor configuration",
-      "observed_result": "not_tested",
-      "full_c2pa_validation": "not_run"
+      "observed_result": "association_recovered",
+      "full_c2pa_validation": "not_run",
+      "tested_by": "@jchomat, erik-sv/telemetry#1",
+      "reproduction": {
+        "software": "WordPress 7.0.1, default Twenty Twenty-Five theme, MariaDB 11, unmodified wp-config",
+        "method": "Fresh wordpress:latest Docker image, installed with wp core install (WP-CLI 2.12.0). The fixture's marked text was piped to wp post create --post_status=publish as post_content over stdin, the published permalink was fetched over HTTP, and the wrapper was re-extracted from the rendered the_content output.",
+        "captured_rendered_text_unicode_escape": "Caf\\xe9 provenance sample.\\ufeff\\U000e0133\\U000e0122\\U000e0140\\U000e0131\\U000e0144\\U000e0148\\U000e0144\\ufe00\\ufe01\\ufe00\\ufe00\\ufe00\\ufe08\\ufe00\\ufe00\\ufe00\\ufe08\\U000e015a\\U000e0165\\U000e015d\\U000e0152",
+        "caveat": "Exercises the storage and server-side render path (wp_insert_post, post_content, the_content filter, theme output). Does not exercise paste handling in the block editor's browser UI."
+      }
     },
     {
       "transform": "spip_editor_round_trip",
       "operation": "publish and retrieve through a named SPIP version and editor configuration",
-      "observed_result": "not_tested",
-      "full_c2pa_validation": "not_run"
+      "observed_result": "association_recovered",
+      "full_c2pa_validation": "not_run",
+      "tested_by": "@jchomat, erik-sv/telemetry#1",
+      "reproduction": {
+        "software": "SPIP 4.3.9 (git.spip.net stable tag), squelettes-dist 4.2.6, urls_etendues 4.1.6, MariaDB 11, default install",
+        "method": "Fresh php:8.2-apache image with SPIP core and its dist plugins cloned from git.spip.net and the standard web installer. The fixture's marked text was written to spip_articles.texte, which matches an editor save because SPIP applies its typography filters at display time. The published article page was fetched over HTTP and the wrapper was re-extracted from the rendered .texte block.",
+        "captured_rendered_text_unicode_escape": "Caf\\xe9 provenance sample.\\ufeff\\U000e0133\\U000e0122\\U000e0140\\U000e0131\\U000e0144\\U000e0148\\U000e0144\\ufe00\\ufe01\\ufe00\\ufe00\\ufe00\\ufe08\\ufe00\\ufe00\\ufe00\\ufe08\\U000e015a\\U000e0165\\U000e015d\\U000e0152",
+        "caveat": "Exercises SPIP's stored-content rendering (typography engine, propre() paragraphing). Does not exercise the admin textarea input path."
+      }
     },
     {
       "transform": "arc_xp_round_trip",
       "operation": "publish and retrieve through a named Arc XP configuration",
       "observed_result": "not_tested",
-      "full_c2pa_validation": "not_run"
+      "full_c2pa_validation": "not_run",
+      "note": "Arc XP is proprietary with no public self-hosted instance. The row stays not_tested rather than approximated."
     },
     {
       "transform": "plain_text_export",
@@ -113,14 +128,14 @@
     },
     {
       "transform": "whitespace_collapse",
-      "operation": "collapse visible-text whitespace while retaining the complete wrapper",
-      "observed_result": "not_tested",
+      "operation": "add doubled spaces, a tab and a line break to the visible text, then collapse every whitespace run to one space, retaining the complete wrapper",
+      "observed_result": "association_recovered",
       "full_c2pa_validation": "not_run_expected_hard_binding_failure_for_changed_asset"
     },
     {
       "transform": "paraphrase_or_summary",
       "operation": "replace the visible text with semantically related generated text",
-      "observed_result": "not_tested",
+      "observed_result": "association_removed_by_definition",
       "full_c2pa_validation": "not_run_expected_failure_unless_a_separate_derived-asset_manifest_is_created"
     }
   ]

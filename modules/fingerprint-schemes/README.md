@@ -1,9 +1,9 @@
 # Fingerprint schemes
 
-**Status:** Draft for discussion. Specification text plus one fixture set; workflow level to follow the common frame.
+**Status:** Draft for discussion. Specification text and two fixture sets; workflow level to follow the common frame (issue #6).
 **Targets:** Content Telemetry 1.0.
 **Origin:** Standard issues #5, #11, #16 and #17, and PR #21. The chair routed this work here on 2 September 2026.
-**Editors:** To be confirmed. Proposed: @erik-sv. Offered: @jchomat (CMS fixtures), @RedHorseMane (match schemes, issue #1).
+**Editors:** To be confirmed. Proposed: @erik-sv (identity schemes and envelope), @RedHorseMane (match schemes, issue #1). Fixtures: @jchomat (CMS round trips).
 
 ## 1. The problem
 
@@ -53,11 +53,11 @@ A check record covers one representation. A grounding event that covers three ch
 | Field | Meaning |
 |-------|---------|
 | `scheme`, `declaration` | Scheme identifier, and declaration reference and digest |
-| `subject` | `role` (for example `grounded_content`) and `digest` of the exact bytes inspected |
+| `subject` | `role` (for example `grounded_content`), `digest` of the exact bytes inspected, and `part_of`, the digest of the whole work, when the checker knows the bytes are part of one |
 | `event` | Optional `session_id` and `event_id` the check relates to |
 | `result` | `found`, `invalid`, `not_found` or `indeterminate` |
 | `invalid_reason` | With `invalid`: `binding_mismatch`, `signature_failure` or `signer_not_validated` |
-| `signal` | With `found`. Identity: validated signer, trust anchor used, work identifier, and the time anchor actually present. Match: registry, entry, and decision policy identifier and digest |
+| `signal` | With `found`. Identity: `signer` (validated signer), `trust_anchor` used, `work_id`, and the `time_anchor` actually present. Match: `registry`, `entry`, and `policy` (decision policy identifier and digest) |
 | `method` | `reproducible` or `attested` |
 
 **Results**
@@ -68,7 +68,7 @@ A check record covers one representation. A grounding event that covers three ch
 - `not_found`: no signal was located.
 - `indeterminate`: the check could not be completed, or does not apply.
 
-**Chunks.** If the checker knows it holds part of a document and the scheme's resolution is `document`, the result MUST be `indeterminate`. Agents often ground chunks (core section 6.4 hashes the chunk), so without this rule document-level schemes would report false negatives.
+**Chunks.** If the checker knows it holds part of a document (`subject.part_of` is present) and the scheme's resolution is `document`, the result MUST be `indeterminate`. Agents often ground chunks (core section 6.4 hashes the chunk), so without this rule document-level schemes would report false negatives.
 
 **Linking to events.** The `event` field is the checker's statement of which event a record relates to. Where an event covers one representation, the record counts for that event only if its subject digest equals the event's `content_hash`. A record about one chunk of a larger representation is evidence about that chunk only.
 
@@ -82,17 +82,17 @@ Every record needs a checker identity, a disclosure of the checker's relationshi
 
 | Field | Meaning |
 |-------|---------|
-| `checker` | Checker identifier, the operator's legal name, and signing key identifier |
-| `relationships` | Any ownership, contract or payment link to the emitter, the content owner or the scheme operator. An empty list states that there is none |
+| `checker` | `id`, the operator's `legal_name`, and the signing `public_key` in the multibase format of core section 8.4 |
+| `relationships` | One entry per link to the emitter, the content owner or the scheme operator: `party` (`emitter`, `content_owner`, `scheme_operator`) and `link` (`ownership`, `contract`, `payment`, `key_custody`). An empty list states that there is none |
 | `checked_at` | Time of the check |
-| signature | Over the whole record |
-| trusted timestamp | Over the signature |
+| `signature` | Over the whole record |
+| `trusted_timestamp` | Over the signature |
 
 The signature shows the record was not altered. The timestamp shows it existed by that time. `checked_at` is the checker's word. None of them shows that every record was delivered: an emitter attaches the records it chooses. Catching withheld records needs delivery to the content owner or an append-only log.
 
 ## 7. Who checks
 
-- **Self-checks.** A record from the emitter, or from a checker that shares its operator, group or key custody, counts as an emitter claim. The same applies to checkers on the content owner's side.
+- **Self-checks.** A record from the emitter, or from a checker that shares its operator, group or key custody, counts as an emitter claim. The same applies to checkers on the content owner's side. A checker whose `public_key` appears in the emitter's manifest MUST list the emitter in `relationships`.
 - **Reproducible checks.** Anyone with the bytes can repeat the check. A consumer that holds the bytes SHOULD repeat it.
 - **Other checks.** The consumer usually lacks the bytes: the agent saw the chunk and the publisher did not. The consumer then relies on a checker that did see it. That checker discloses its relationships in the signed record, and consumer policy decides whether to accept it. An event cannot make that disclosure on the checker's behalf.
 
@@ -100,18 +100,22 @@ The signature shows the record was not altered. The timestamp shows it existed b
 
 A survivability matrix has one row per transform, naming the transform, scheme version, fixtures, conditions and result. Untested rows say `not_tested`. A pass MUST NOT be generalised to another transform, corpus or version, and `content_borne: true` is not a survivability claim. Vectors MAY be synthetic and need not show where or how a signal is placed.
 
-The first matrix, `fixtures/survivability-c2pa-text.json`, comes from PR #21. It tests whether the C2PA text wrapper can be recovered after each transform, and nothing more: its manifest is unsigned, and it verifies no signature or binding. `check_survivability.py` reruns its ten tested rows and reports the seven untested ones.
+The first matrix, `fixtures/survivability-c2pa-text.json`, comes from PR #21. It tests whether the C2PA text wrapper can be recovered after each transform, and nothing more: its manifest is unsigned, and it verifies no signature or binding. `check_survivability.py` reruns its fifteen tested rows and reports the two untested ones (Arc XP and named-editor plain-text export). The WordPress 7.0.1 and SPIP 4.3.9 rows are @jchomat's publish-and-retrieve results; `cms-survivability/` holds his setup and protocol.
 
 A scheme MAY keep its methods private. The module requires no disclosure of carriers, detector features, scores, thresholds, calibration data or keys. An attested check MUST still produce a record that anyone can verify for signature, subject, time and checker without the detector. Consumers will weigh attested and reproducible checks differently.
 
-## 9. Fixtures to come
+## 9. Fixtures
 
-- @jchomat's WordPress 7.0.1 and SPIP 4.3.9 fixtures (erik-sv/telemetry#1), with his agreement and credit.
-- Negative vectors for: a subject digest that does not match the event; a binding mismatch reported as `found`; a checker whose key appears in the emitter's manifest while its `relationships` list is empty; a missing timestamp; a match presented as identity; `not_found` on a known chunk under `document` resolution; one record covering two chunks.
+Both sets run from a clean checkout with Python 3 and no dependencies:
+
+- `python3 check_survivability.py`: the survivability matrix in section 8.
+- `python3 check_records.py`: check-record vectors in `fixtures/check-records.json`. Five records are valid. Seven are negative vectors, each expected to fail with exactly one error code: a subject digest that does not match the event; a binding mismatch reported as `found`; a checker whose key appears in the emitter's manifest while its `relationships` list is empty; a missing trusted timestamp; a match presented as identity; `not_found` on a known chunk under `document` resolution; one record covering two chunks.
+
+The record vectors test structure and consistency. Until open question 1 is settled they check that `signature` and `trusted_timestamp` are present, not that they verify. All schemes, keys and parties in them are fictional.
 
 Two independent checkers must agree on these vectors before the module is marked stable.
 
-## 10. Open questions for October
+## 10. Open questions for the first session
 
 1. Should records use COSE_Sign1, to match C2PA, or JWS, to match web tooling?
 2. Do the envelope and relationship disclosure belong in the common frame, this module, or governing terms?
